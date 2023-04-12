@@ -8,3 +8,5 @@ Define the discriminator model that takes as input the Input image and the gener
 Compile the models and train them on the training dataset using an appropriate loss function such as binary cross-entropy loss.
 During testing, load the Input image from the testing dataset and pass it through the generator to generate the corresponding Output image.
 Save the generated Output image to the Output folder.
+
+https://drive.matlab.com/files/
