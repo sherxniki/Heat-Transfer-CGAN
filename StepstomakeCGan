@@ -1,0 +1,10 @@
+To write a conditional generative adversarial network (CGAN) code to predict output when given input for testing, we can follow these steps:
+
+Load the Input and Output folders containing pictures using a suitable library such as PIL or OpenCV.
+Split the Input folder into training and testing datasets using a split ratio of 80:20.
+Preprocess the images by resizing them to a suitable size and normalizing the pixel values between 0 and 1.
+Define the generator model using a suitable deep learning framework such as TensorFlow or PyTorch. The generator takes as input a noise vector and the condition (i.e., the Input image) and generates the corresponding Output image.
+Define the discriminator model that takes as input the Input image and the generated Output image and predicts whether they are real or fake.
+Compile the models and train them on the training dataset using an appropriate loss function such as binary cross-entropy loss.
+During testing, load the Input image from the testing dataset and pass it through the generator to generate the corresponding Output image.
+Save the generated Output image to the Output folder.
