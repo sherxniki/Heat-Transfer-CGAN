@@ -1,0 +1,188 @@
+import os
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.layers import Input, Concatenate, Conv2D, Conv2DTranspose
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam
+
+def load_images(path):
+    """
+    This function loads images from a given path and returns them as a numpy array.
+    
+    Parameters:
+    path (str): The path to the folder containing the images
+    
+    Returns:
+    numpy.ndarray: The loaded images as a numpy array
+    """
+    # Load the images using the ImageDataGenerator
+    datagen = ImageDataGenerator(rescale=1./255)
+    images = datagen.flow_from_directory(path, target_size=(256, 256), batch_size=2000, class_mode=None)
+    
+    # Convert the images to a numpy array
+    images = np.concatenate([images.next() for i in range(images.samples // images.batch_size)])
+    
+    return images
+
+def build_generator():
+    """
+    This function builds the generator network for the CGAN Pix2Pix model.
+    
+    Returns:
+    tensorflow.keras.Model: The generator network
+    """
+    # Define the input shape
+    input_shape = (256, 256, 3)
+    
+    # Define the input layer
+    input_layer = Input(shape=input_shape)
+    
+    # Encoder
+    enc1 = Conv2D(64, (4, 4), strides=(2, 2), padding='same', activation='relu')(input_layer)
+    enc2 = Conv2D(128, (4, 4), strides=(2, 2), padding='same', activation='relu')(enc1)
+    enc3 = Conv2D(256, (4, 4), strides=(2, 2), padding='same', activation='relu')(enc2)
+    enc4 = Conv2D(512, (4, 4), strides=(2, 2), padding='same', activation='relu')(enc3)
+    enc5 = Conv2D(512, (4, 4), strides=(2, 2), padding='same', activation='relu')(enc4)
+    enc6 = Conv2D(512, (4, 4), strides=(2, 2), padding='same', activation='relu')(enc5)
+    enc7 = Conv2D(512, (4, 4), strides=(2, 2), padding='same', activation='relu')(enc6)
+    enc8 = Conv2D(512, (4, 4), strides=(2, 2), padding='same', activation='relu')(enc7)
+    
+    # Decoder
+    dec1 = Conv2DTranspose(512, (4, 4), strides=(2, 2), padding='same', activation='relu')(enc8)
+    dec1 = Concatenate()([dec1, enc7])
+    dec2 = Conv2DTranspose(512, (4, 4), strides=(2, 2), padding='same', activation='relu')(dec1)
+    dec2 = Concatenate()([dec2, enc6])
+    dec3 = Conv2DTranspose(512, (4, 4), strides=(2, 2), padding='same', activation='relu')(dec2)
+    dec3 = Concatenate()([dec3, enc5])
+    dec4 = Conv2DTranspose(512, (4, 4), strides=(2, 2), padding='same', activation='relu')(dec3)
+    dec4 = Concatenate()([dec4, enc4])
+    dec5 = Conv2DTranspose(256, (4, 4), strides=(2, 2), padding='same', activation='relu')(dec4)
+    dec5 = Concatenate()([dec5, enc3])
+    dec6 = Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same', activation='relu')(dec5)
+    dec6 = Concatenate()([dec6, enc2])
+    dec7 = Conv2DTranspose(64, (4, 4), strides=(2, 2), padding='same', activation='relu')(dec6)
+    dec7 = Concatenate()([dec7, enc1])
+    output_layer = Conv2DTranspose(3, (4, 4), strides=(2, 2), padding='same', activation='tanh')(dec7)
+    
+    # Define the model
+    model = Model(inputs=[input_layer], outputs=[output_layer])
+    
+    return model
+
+def build_discriminator():
+    """
+    This function builds the discriminator network for the CGAN Pix2Pix model.
+    
+    Returns:
+    tensorflow.keras.Model: The discriminator network
+    """
+    # Define the input shape
+    input_shape = (256, 256, 3)
+    
+    # Define the input layer
+    input_layer = Input(shape=input_shape)
+    
+    # Convolutional layers
+    conv1 = Conv2D(64, (4, 4), strides=(2, 2), padding='same', activation='relu')(input_layer)
+    conv2 = Conv2D(128, (4, 4), strides=(2, 2), padding='same', activation='relu')(conv1)
+    conv3 = Conv2D(256, (4, 4), strides=(2, 2), padding='same', activation='relu')(conv2)
+    conv4 = Conv2D(512, (4, 4), strides=(2, 2), padding='same', activation='relu')(conv3)
+    
+    # Output layer
+    output_layer = Conv2D(1, (4, 4), strides=(1, 1), padding='same', activation='sigmoid')(conv4)
+    
+    # Define the model
+    model = Model(inputs=[input_layer], outputs=[output_layer])
+    
+    return model
+
+def build_gan(generator, discriminator):
+    """
+    This function builds the GAN model for the CGAN Pix2Pix model.
+    
+    Parameters:
+    generator (tensorflow.keras.Model): The generator network
+    discriminator (tensorflow.keras.Model): The discriminator network
+    
+    Returns:
+    tensorflow.keras.Model: The GAN model
+    """
+    # Freeze the discriminator weights
+    discriminator.trainable = False
+    
+    # Define the input shape
+    input_shape = (256, 256, 3)
+    
+    # Define the input layer
+    input_layer = Input(shape=input_shape)
+    
+    # Generate images
+    generated_images = generator(input_layer)
+    
+    # Discriminator output
+    discriminator_output = discriminator([input_layer, generated_images])
+    
+    # Define the model
+    model = Model(inputs=[input_layer], outputs=[generated_images, discriminator_output])
+    
+    return model
+
+def train():
+    """
+    This function trains the CGAN Pix2Pix model.
+    """
+    # Define the paths to the input and output folders
+    input_path = 'a/'
+    output_path = 'b/'
+    
+    # Load the input and output images
+    input_images = load_images(input_path)
+    output_images = load_images(output_path)
+    
+    # Split the data into training and testing sets
+    split_index = int(0.8 * len(input_images))
+    train_input = input_images[:split_index]
+    train_output = output_images[:split_index]
+    test_input = input_images[split_index:]
+    test_output = output_images[split_index:]
+    
+    # Build the generator, discriminator, and GAN models
+    generator = build_generator()
+    discriminator = build_discriminator()
+    gan = build_gan(generator, discriminator)
+    
+    # Compile the models
+    generator.compile(loss='binary_crossentropy', optimizer=Adam(lr=0.0002, beta_1=0.5))
+    discriminator.compile(loss='binary_crossentropy', optimizer=Adam(lr=0.0002, beta_1=0.5))
+    gan.compile(loss=['binary_crossentropy', 'binary_crossentropy'], optimizer=Adam(lr=0.0002, beta_1=0.5))
+    
+    # Train the models
+    epochs = 100
+    batch_size = 1
+    steps_per_epoch = len(train_input) // batch_size
+    for epoch in range(epochs):
+        for step in range(steps_per_epoch):
+            # Select a random batch of images
+            batch_index = np.random.randint(0, len(train_input), size=batch_size)
+            real_input = train_input[batch_index]
+            real_output = train_output[batch_index]
+            
+            # Generate fake images
+            fake_output = generator.predict(real_input)
+            
+            # Train the discriminator
+            discriminator_loss_real = discriminator.train_on_batch([real_input, real_output], np.ones((batch_size, 256, 256, 1)))
+            discriminator_loss_fake = discriminator.train_on_batch([real_input, fake_output], np.zeros((batch_size, 256, 256, 1)))
+            discriminator_loss = 0.5 * np.add(discriminator_loss_real, discriminator_loss_fake)
+            
+            # Train the generator
+            generator_loss = gan.train_on_batch(real_input, [real_output, np.ones((batch_size, 256, 256, 1)))])
+            
+        # Print the losses
+        print(f"Epoch {epoch+1}/{epochs}, Discriminator Loss: {discriminator_loss}, Generator Loss: {generator_loss}")
+        
+    # Save the models
+    generator.save('generator.h5')
+    discriminator.save('discriminator.h5')
+    gan.save('gan.h5')
