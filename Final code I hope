@@ -12,8 +12,8 @@ from keras.optimizers import Adam
 
 
 # Define the data directories
-dir_A = "C:\Users\NIKITAA\Downloads\toutput(3)\toutput"
-dir_B = "C:\Users\NIKITAA\Downloads\tinput(5)\tinput"
+dir_A = r"C:\Users\NIKITAA\Downloads\toutput(3)\toutput"
+dir_B = r"C:\Users\NIKITAA\Downloads\tinput(5)\tinput"
 
 # Define the image dimensions
 img_rows = 256
