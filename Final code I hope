@@ -12,8 +12,8 @@ from keras.optimizers import Adam
 
 
 # Define the data directories
-dir_A = r"C:\Users\NIKITAA\Downloads\toutput(3)\toutput"
-dir_B = r"C:\Users\NIKITAA\Downloads\tinput(5)\tinput"
+dir_A = r"C:\Users\NIKITAA\Downloads\tinput(5)\tinput"
+dir_B = r"C:\Users\NIKITAA\Downloads\toutput(3)\toutput"
 
 # Define the image dimensions
 img_rows = 256
@@ -38,7 +38,7 @@ datagen_toutput = ImageDataGenerator(
 
 # Load the images from folder tinput and preprocess them
 train_generator_tinput = datagen_tinput.flow_from_directory(
-    directory=dir_tinput,
+    directory=dir_a,
     target_size=(img_rows, img_cols),
     batch_size=batch_size,
     class_mode=None,
@@ -49,7 +49,7 @@ train_generator_tinput = datagen_tinput.flow_from_directory(
 
 # Load the images from folder toutput and preprocess them
 train_generator_toutput = datagen_toutput.flow_from_directory(
-    directory=dir_toutput,
+    directory=dir_b,
     target_size=(img_rows, img_cols),
     batch_size=batch_size,
     class_mode=None,
@@ -60,7 +60,7 @@ train_generator_toutput = datagen_toutput.flow_from_directory(
 
 # Load the validation images from folder tinput and preprocess them
 val_generator_tinput = datagen_tinput.flow_from_directory(
-    directory=dir_tinput,
+    directory=dir_a,
     target_size=(img_rows, img_cols),
     batch_size=batch_size,
     class_mode=None,
@@ -71,7 +71,7 @@ val_generator_tinput = datagen_tinput.flow_from_directory(
 
 # Load the validation images from folder toutput and preprocess them
 val_generator_toutput = datagen_toutput.flow_from_directory(
-    directory=dir_toutput,
+    directory=dir_b,
     target_size=(img_rows, img_cols),
     batch_size=batch_size,
     class_mode=None,
