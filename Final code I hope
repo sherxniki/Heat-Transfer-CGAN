@@ -12,8 +12,8 @@ from keras.optimizers import Adam
 
 
 # Define the data directories
-dir_A = "/path/to/folder/A"
-dir_B = "/path/to/folder/B"
+dir_A = "C:\Users\NIKITAA\Downloads\toutput(3)\toutput"
+dir_B = "C:\Users\NIKITAA\Downloads\tinput(5)\tinput"
 
 # Define the image dimensions
 img_rows = 256
@@ -24,21 +24,21 @@ img_shape = (img_rows, img_cols, channels)
 # Define the batch size
 batch_size = 1
 
-# Define the ImageDataGenerator for folder A
-datagen_A = ImageDataGenerator(
+# Define the ImageDataGenerator for folder tinput
+datagen_tinput = ImageDataGenerator(
     rescale=1./255,
     validation_split=0.1
 )
 
-# Define the ImageDataGenerator for folder B
-datagen_B = ImageDataGenerator(
+# Define the ImageDataGenerator for folder toutput
+datagen_toutput = ImageDataGenerator(
     rescale=1./255,
     validation_split=0.1
 )
 
-# Load the images from folder A and preprocess them
-train_generator_A = datagen_A.flow_from_directory(
-    directory=dir_A,
+# Load the images from folder tinput and preprocess them
+train_generator_tinput = datagen_tinput.flow_from_directory(
+    directory=dir_tinput,
     target_size=(img_rows, img_cols),
     batch_size=batch_size,
     class_mode=None,
@@ -47,9 +47,9 @@ train_generator_A = datagen_A.flow_from_directory(
     seed=42
 )
 
-# Load the images from folder B and preprocess them
-train_generator_B = datagen_B.flow_from_directory(
-    directory=dir_B,
+# Load the images from folder toutput and preprocess them
+train_generator_toutput = datagen_toutput.flow_from_directory(
+    directory=dir_toutput,
     target_size=(img_rows, img_cols),
     batch_size=batch_size,
     class_mode=None,
@@ -58,9 +58,9 @@ train_generator_B = datagen_B.flow_from_directory(
     seed=42
 )
 
-# Load the validation images from folder A and preprocess them
-val_generator_A = datagen_A.flow_from_directory(
-    directory=dir_A,
+# Load the validation images from folder tinput and preprocess them
+val_generator_tinput = datagen_tinput.flow_from_directory(
+    directory=dir_tinput,
     target_size=(img_rows, img_cols),
     batch_size=batch_size,
     class_mode=None,
@@ -69,9 +69,9 @@ val_generator_A = datagen_A.flow_from_directory(
     seed=42
 )
 
-# Load the validation images from folder B and preprocess them
-val_generator_B = datagen_B.flow_from_directory(
-    directory=dir_B,
+# Load the validation images from folder toutput and preprocess them
+val_generator_toutput = datagen_toutput.flow_from_directory(
+    directory=dir_toutput,
     target_size=(img_rows, img_cols),
     batch_size=batch_size,
     class_mode=None,
